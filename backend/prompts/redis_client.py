@@ -13,6 +13,9 @@ def get_redis_client():
                 redis_url,
                 decode_responses=True,
                 ssl_cert_reqs=None,
+                socket_connect_timeout=5,
+                socket_timeout=5,
+                retry_on_timeout=True,
             )
         else:
             _client = redis.Redis(
@@ -20,6 +23,8 @@ def get_redis_client():
                 port=settings.REDIS_PORT,
                 db=settings.REDIS_DB,
                 decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
             )
     return _client
 
@@ -28,8 +33,9 @@ def increment_view_count(prompt_id: int) -> int:
     try:
         client = get_redis_client()
         key = f"prompt:{prompt_id}:views"
-        return client.incr(key)
-    except Exception:
+        return int(client.incr(key))
+    except Exception as e:
+        print(f"Redis increment error: {e}")
         return 0
 
 
@@ -39,7 +45,8 @@ def get_view_count(prompt_id: int) -> int:
         key = f"prompt:{prompt_id}:views"
         value = client.get(key)
         return int(value) if value is not None else 0
-    except Exception:
+    except Exception as e:
+        print(f"Redis get error: {e}")
         return 0
 
 
@@ -56,5 +63,6 @@ def get_all_view_counts(prompt_ids: list) -> dict:
             pid: int(val) if val is not None else 0
             for pid, val in zip(prompt_ids, results)
         }
-    except Exception:
+    except Exception as e:
+        print(f"Redis pipeline error: {e}")
         return {pid: 0 for pid in prompt_ids}
