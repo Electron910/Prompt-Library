@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR-BACKEND.onrender.com/api/\$1"
+      "destination": "https://prompt-library-9682.onrender.com/api/$1"
     },
     {
       "source": "/((?!api).*)",
