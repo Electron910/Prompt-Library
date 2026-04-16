@@ -1,0 +1,73 @@
+<div class="page-enter">
+  <div class="container">
+    <header class="page-header">
+      <div class="header-top">
+        <div>
+          <h1 class="page-title">Prompt Library</h1>
+          <p class="page-subtitle">AI image generation prompts, organized.</p>
+        </div>
+        <a routerLink="/add-prompt" class="btn btn-primary">
+          <span>+</span> New Prompt
+        </a>
+      </div>
+
+      <div class="filter-bar" *ngIf="tags.length > 0">
+        <span class="filter-label">Filter:</span>
+        <button
+          class="tag-chip"
+          [class.active]="selectedTag === null"
+          (click)="clearFilter()">
+          All
+        </button>
+        <button
+          *ngFor="let tag of tags"
+          class="tag-chip"
+          [class.active]="selectedTag === tag.name"
+          (click)="filterByTag(tag.name)">
+          {{ tag.name }}
+        </button>
+      </div>
+    </header>
+
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <div class="loading-state" *ngIf="loading">
+      <app-loading-spinner></app-loading-spinner>
+      <span>Loading prompts...</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && !error && prompts.length === 0">
+      <div class="empty-icon">◈</div>
+      <p class="empty-title">No prompts yet</p>
+      <p class="empty-desc">
+        <ng-container *ngIf="selectedTag">No prompts tagged "{{ selectedTag }}".</ng-container>
+        <ng-container *ngIf="!selectedTag">Start by adding your first prompt.</ng-container>
+      </p>
+      <a routerLink="/add-prompt" class="btn btn-primary" *ngIf="!selectedTag">Add Prompt</a>
+    </div>
+
+    <div class="prompt-grid" *ngIf="!loading && prompts.length > 0">
+      <a
+        *ngFor="let prompt of prompts; trackBy: trackById"
+        [routerLink]="['/prompts', prompt.id]"
+        class="prompt-card">
+        <div class="card-header">
+          <h3 class="card-title">{{ prompt.title }}</h3>
+          <app-complexity-badge [complexity]="prompt.complexity"></app-complexity-badge>
+        </div>
+
+        <p class="card-content">{{ prompt.content | slice:0:120 }}{{ prompt.content.length > 120 ? '…' : '' }}</p>
+
+        <div class="card-footer">
+          <div class="card-tags" *ngIf="prompt.tags.length > 0">
+            <span *ngFor="let tag of prompt.tags" class="tag-chip small">{{ tag.name }}</span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-views">{{ prompt.view_count }} views</span>
+            <span class="meta-date">{{ prompt.created_at | date:'MMM d, y' }}</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: ai-prompt-library-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "localhost,127.0.0.1,.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-prompt-library-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ai-prompt-library-redis
+          type: redis
+          property: connectionString
+      - key: FRONTEND_URL
+        value: "https://your-app.vercel.app"
+
+databases:
+  - name: ai-prompt-library-db
+    plan: free
+
+  - name: ai-prompt-library-redis
+    plan: free
+    ipAllowList: []

@@ -1,0 +1,163 @@
+<div class="page-enter">
+  <div class="container form-container">
+    <header class="page-header">
+      <a routerLink="/prompts" class="btn btn-ghost back-btn">← Back</a>
+      <div class="header-content">
+        <h1 class="page-title">New Prompt</h1>
+        <p class="page-subtitle">Add a new AI image generation prompt to the library.</p>
+      </div>
+    </header>
+
+    <div class="alert alert-success" *ngIf="submitSuccess">
+      ✓ Prompt created successfully. Redirecting...
+    </div>
+
+    <div class="alert alert-error" *ngIf="submitError">
+      {{ submitError }}
+    </div>
+
+    <form [formGroup]="promptForm" (ngSubmit)="onSubmit()" class="prompt-form" novalidate>
+
+      <div class="form-field">
+        <label for="title">Title</label>
+        <input
+          id="title"
+          type="text"
+          formControlName="title"
+          placeholder="e.g. Cyberpunk City at Dusk"
+          [class.error]="isFieldInvalid(title)"
+          autocomplete="off">
+        <div class="field-meta">
+          <div>
+            <span class="error-message" *ngIf="isFieldInvalid(title) && title.errors?.['required']">
+              Title is required.
+            </span>
+            <span class="error-message" *ngIf="isFieldInvalid(title) && title.errors?.['minlength']">
+              Title must be at least 3 characters.
+            </span>
+            <span class="error-message" *ngIf="isFieldInvalid(title) && title.errors?.['maxlength']">
+              Title must be under 255 characters.
+            </span>
+          </div>
+          <span class="char-count" [class.over]="(title.value?.length || 0) > 240">
+            {{ title.value?.length || 0 }}/255
+          </span>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="content">Prompt Content</label>
+        <textarea
+          id="content"
+          formControlName="content"
+          placeholder="Describe the image in detail. Include style, lighting, mood, colors, camera angle..."
+          rows="8"
+          [class.error]="isFieldInvalid(content)">
+        </textarea>
+        <div class="field-meta">
+          <div>
+            <span class="error-message" *ngIf="isFieldInvalid(content) && content.errors?.['required']">
+              Content is required.
+            </span>
+            <span class="error-message" *ngIf="isFieldInvalid(content) && content.errors?.['minlength']">
+              Content must be at least 20 characters.
+            </span>
+          </div>
+          <span class="char-count">
+            {{ content.value?.length || 0 }} chars
+          </span>
+        </div>
+      </div>
+
+      <div class="form-field complexity-field">
+        <label for="complexity">
+          Complexity
+          <span class="complexity-badge-inline" [ngClass]="'badge badge-' + getComplexityClass(complexityValue)">
+            {{ getComplexityLabel(complexityValue) }} · {{ complexityValue }}/10
+          </span>
+        </label>
+        <div class="complexity-slider-wrapper">
+          <span class="slider-label">1</span>
+          <input
+            id="complexity"
+            type="range"
+            formControlName="complexity"
+            min="1"
+            max="10"
+            step="1"
+            class="complexity-slider">
+          <span class="slider-label">10</span>
+        </div>
+        <div class="complexity-ticks">
+          <span
+            *ngFor="let n of [1,2,3,4,5,6,7,8,9,10]"
+            class="tick"
+            [class.active]="n === complexityValue"
+            (click)="complexity.setValue(n)">
+            {{ n }}
+          </span>
+        </div>
+        <span class="error-message" *ngIf="isFieldInvalid(complexity)">
+          Complexity must be between 1 and 10.
+        </span>
+      </div>
+
+      <div class="form-field tags-field">
+        <label>Tags <span class="label-optional">(optional)</span></label>
+
+        <div class="tag-selector" *ngIf="availableTags.length > 0">
+          <span class="tags-hint">Select existing:</span>
+          <div class="tag-options">
+            <button
+              type="button"
+              *ngFor="let tag of availableTags"
+              class="tag-chip"
+              [class.active]="isTagSelected(tag.name)"
+              (click)="toggleTag(tag.name)">
+              {{ tag.name }}
+            </button>
+          </div>
+        </div>
+
+        <div class="custom-tag-input">
+          <input
+            #tagInput
+            type="text"
+            placeholder="Add custom tag..."
+            (keyup.enter)="addCustomTag(tagInput.value); tagInput.value = ''"
+            (input)="onTagInputChange($event)"
+            autocomplete="off">
+          <button
+            type="button"
+            class="btn btn-ghost add-tag-btn"
+            (click)="addCustomTag(tagInput.value); tagInput.value = ''">
+            Add
+          </button>
+        </div>
+
+        <div class="selected-tags" *ngIf="selectedTags.length > 0">
+          <span class="tags-hint">Selected:</span>
+          <div class="selected-tag-list">
+            <span
+              *ngFor="let tag of selectedTags"
+              class="tag-chip active removable"
+              (click)="removeSelectedTag(tag)">
+              {{ tag }} ×
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a routerLink="/prompts" class="btn btn-ghost">Cancel</a>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="submitting || submitSuccess">
+          <span class="spinner" *ngIf="submitting"></span>
+          {{ submitting ? 'Creating...' : 'Create Prompt' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

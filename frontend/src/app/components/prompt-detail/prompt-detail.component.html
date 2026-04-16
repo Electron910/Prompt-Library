@@ -1,0 +1,84 @@
+<div class="page-enter">
+  <div class="container">
+    <div class="back-link">
+      <a routerLink="/prompts" class="btn btn-ghost">
+        ← Back to Library
+      </a>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <app-loading-spinner></app-loading-spinner>
+      <span>Loading prompt...</span>
+    </div>
+
+    <div class="alert alert-error" *ngIf="error && !loading">
+      {{ error }}
+    </div>
+
+    <article class="prompt-detail" *ngIf="prompt && !loading">
+      <header class="detail-header">
+        <div class="title-row">
+          <h1 class="detail-title">{{ prompt.title }}</h1>
+          <app-complexity-badge [complexity]="prompt.complexity"></app-complexity-badge>
+        </div>
+
+        <div class="detail-meta">
+          <span class="meta-item">
+            <span class="meta-icon">◷</span>
+            {{ prompt.created_at | date:'MMMM d, y · h:mm a' }}
+          </span>
+          <span class="meta-divider">·</span>
+          <span class="meta-item view-count">
+            <span class="meta-icon">◉</span>
+            <span class="count-value">{{ prompt.view_count }}</span>
+            {{ prompt.view_count === 1 ? 'view' : 'views' }}
+          </span>
+          <span class="meta-divider">·</span>
+          <span class="meta-item">
+            <span class="meta-icon">⬡</span>
+            Complexity {{ prompt.complexity }}/10
+          </span>
+        </div>
+
+        <div class="detail-tags" *ngIf="prompt.tags.length > 0">
+          <span *ngFor="let tag of prompt.tags" class="tag-chip">
+            {{ tag.name }}
+          </span>
+        </div>
+      </header>
+
+      <div class="content-card">
+        <div class="content-toolbar">
+          <span class="content-label">Prompt Content</span>
+          <div class="toolbar-actions">
+            <button class="btn btn-ghost toolbar-btn" (click)="refreshViewCount()">
+              ↻ Refresh
+            </button>
+            <button
+              class="btn toolbar-btn"
+              [class.btn-ghost]="!copied"
+              [class.btn-success]="copied"
+              (click)="copyContent()">
+              {{ copied ? '✓ Copied' : '⎘ Copy' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="content-body">
+          <p class="prompt-content">{{ prompt.content }}</p>
+        </div>
+      </div>
+
+      <div class="view-counter-card">
+        <div class="counter-label">Live View Count</div>
+        <div class="counter-value">{{ prompt.view_count }}</div>
+        <div class="counter-desc">
+          Tracked in Redis · increments each time this page loads
+        </div>
+        <button class="btn btn-ghost counter-refresh" (click)="refreshViewCount()">
+          ↻ Reload to increment
+        </button>
+      </div>
+    </article>
+  </div>
+</div>
